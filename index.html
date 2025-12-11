@@ -3,8 +3,10 @@
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body>
   <h2>Event Feedback</h2>
-  <input id="feedback" placeholder="Enter a word..." />
-  <button id="submitBtn">Submit</button>
+  <form action="https://script.google.com/macros/s/AKfycbzqOxa8ZvNV7XK2ACABVt129BF70dHaG75mvMMSVEIlPnVedYD51OoA38Pi3OL5gbCioQ/exec" method="POST">
+  <input name="feedback" type="text" required />
+  <button type="submit">Submit</button>
+  </form>
   <p id="msg"></p>
 
 <script>
@@ -54,3 +56,4 @@ document.getElementById('submitBtn').addEventListener('click', function (e) {
 </script>
 </body>
 </html>
+
