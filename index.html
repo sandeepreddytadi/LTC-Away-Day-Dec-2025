@@ -1,59 +1,25 @@
 <!doctype html>
 <html>
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Feedback</title>
+</head>
 <body>
   <h2>Event Feedback</h2>
-  <form action="https://script.google.com/macros/s/AKfycbzqOxa8ZvNV7XK2ACABVt129BF70dHaG75mvMMSVEIlPnVedYD51OoA38Pi3OL5gbCioQ/exec" method="POST">
-  <input name="feedback" type="text" required />
-  <button type="submit">Submit</button>
+
+  <form id="feedbackForm" action="https://script.google.com/macros/s/AKfycbzqOxa8ZvNV7XK2ACABVt129BF70dHaG75mvMMSVEIlPnVedYD51OoA38Pi3OL5gbCioQ/exec" method="POST" target="thankwin">
+    <input name="feedback" id="feedback" type="text" placeholder="Enter a word..." required />
+    <button type="submit" id="submitBtn">Submit</button>
   </form>
-  <p id="msg"></p>
 
-<script>
-document.getElementById('submitBtn').addEventListener('click', function (e) {
-  var text = document.getElementById('feedback').value.trim();
-  if (!text) return alert('Please enter feedback.');
-
-  // 1) open a new blank window on the user gesture (allowed)
-  var thankWin = window.open('about:blank', '_blank');
-
-  // optional: show a temporary message in the new window
-  if (thankWin) {
-    try { thankWin.document.write('<p style="font-family:sans-serif;padding:20px">Preparing your thank-you page…</p>'); }
-    catch(err){ /* cross-origin write might fail in some browsers — ignore */ }
-  }
-
-  // 2) send feedback to Apps Script (URL-encoded)
-  fetch('https://script.google.com/macros/s/AKfycbzqOxa8ZvNV7XK2ACABVt129BF70dHaG75mvMMSVEIlPnVedYD51OoA38Pi3OL5gbCioQ/exec', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: 'feedback=' + encodeURIComponent(text)
-  }).then(function(resp){
-    // success: navigate the new window to the thank-you page
-    if (thankWin) {
-      try {
-        thankWin.location.href = 'http://ltcawaydaydec2025.netlify.app/thankyou.html'; // e.g. https://your-site.netlify.app/thankyou.html
-        // optionally focus the thank-you window
-        try { thankWin.focus(); } catch(e){}
-      } catch(err) {
-        // fallback: if setting location fails, open direct (will create another tab)
-        window.open('http://ltcawaydaydec2025.netlify.app/thankyou.html', '_blank');
-      }
-    } else {
-      // If popup blocked, fallback to opening thank-you in same tab
-      window.location.href = 'http://ltcawaydaydec2025.netlify.app/thankyou.html';
-    }
-
-    document.getElementById('msg').innerText = 'Thanks! Your feedback was sent.';
-    document.getElementById('feedback').value = '';
-  }).catch(function(err){
-    document.getElementById('msg').innerText = 'Failed to send — try again.';
-    console.error(err);
-    // If we opened a window but failed to submit, close it
-    try { if (thankWin) thankWin.close(); } catch(e){}
-  });
-});
-</script>
+  <script>
+    document.getElementById('feedbackForm').addEventListener('submit', function(e){
+      // Open (or focus) the thank-you window immediately — this makes it a user gesture so it can be closed later.
+      var win = window.open('about:blank', 'thankwin');
+      // Do nothing else — form will submit to the Apps Script and the response (Apps Script) will redirect that window to your Netlify thankyou page.
+      // If popup blocked, the browser will open the response in same tab — that's acceptable fallback.
+    });
+  </script>
 </body>
 </html>
-
