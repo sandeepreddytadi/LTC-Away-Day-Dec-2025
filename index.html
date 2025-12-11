@@ -42,11 +42,9 @@
       cursor:pointer;
       box-shadow:0 8px 18px rgba(0,100,255,0.12);
     }
-    /* Disabled state for button while sending */
     button.submit:disabled {
       background: #ccc;
       cursor: default;
-      box-shadow: none;
     }
   </style>
 </head>
@@ -59,6 +57,7 @@
       <input id="feedbackInput" name="feedback" type="text" placeholder="One word (e.g. Inspiring)" maxlength="60" required autocomplete="off" />
       <button class="submit" type="submit" id="submitBtn">Submit Feedback</button>
     </form>
+
   </div>
 
 <script>
@@ -70,24 +69,25 @@
     var scriptURL = "https://script.google.com/macros/s/AKfycbzqOxa8ZvNV7XK2ACABVt129BF70dHaG75mvMMSVEIlPnVedYD51OoA38Pi3OL5gbCioQ/exec";
 
     form.addEventListener('submit', function(e){
-      e.preventDefault(); // Stop the form from causing a page reload/redirect
+      // This line STOPS the browser from going to the Google page
+      e.preventDefault(); 
 
-      // 1. UI Loading State
+      // 1. Show 'Sending...'
       submitBtn.disabled = true;
       submitBtn.innerText = 'Sending...';
 
-      // 2. Send Data Silently
+      // 2. Prepare data
       var formData = new FormData(form);
       
+      // 3. Send to Google silently
       fetch(scriptURL, { method: 'POST', body: formData, mode: 'no-cors'})
         .then(function(response) {
-          // 3. Success! Redirect to Thank You page
+          // Success! Redirect to Thank You page
           window.location.href = "https://ltcawaydaydec2025.netlify.app/thankyou.html";
         })
         .catch(function(error) {
+          // Even on error, we redirect to keep the flow smooth
           console.error('Error!', error.message);
-          // Optional: You could show an alert here, or just redirect anyway.
-          // For now, we redirect anyway to keep the user experience smooth.
           window.location.href = "https://ltcawaydaydec2025.netlify.app/thankyou.html";
         });
     });
