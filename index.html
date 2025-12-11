@@ -42,8 +42,12 @@
       cursor:pointer;
       box-shadow:0 8px 18px rgba(0,100,255,0.12);
     }
-    .hint { margin-top:12px; color:#607b9a; font-size:13px; }
-    .small { font-size:12px; color:#9aa9c3; margin-top:8px; }
+    /* Disabled state for button while sending */
+    button.submit:disabled {
+      background: #ccc;
+      cursor: default;
+      box-shadow: none;
+    }
   </style>
 </head>
 <body>
@@ -51,50 +55,42 @@
     <h1>LTC Away Day — Quick Feedback</h1>
     <p>Enter one word that describes the session. Tap Submit — thank you!</p>
 
-    <!--
-      IMPORTANT:
-      - target="thankwin" ensures the form submits into a new window/tab named thankwin.
-      - action uses your Apps Script web app /exec URL.
-      - The Apps Script doPost should redirect that window to your Netlify thankyou.html using location.replace()
-    -->
-    <form id="feedbackForm"
-          action="https://script.google.com/macros/s/AKfycbzqOxa8ZvNV7XK2ACABVt129BF70dHaG75mvMMSVEIlPnVedYD51OoA38Pi3OL5gbCioQ/exec"
-          method="POST"
-          target="thankwin"
-          accept-charset="UTF-8">
+    <form id="feedbackForm">
       <input id="feedbackInput" name="feedback" type="text" placeholder="One word (e.g. Inspiring)" maxlength="60" required autocomplete="off" />
       <button class="submit" type="submit" id="submitBtn">Submit Feedback</button>
     </form>
-
-    <div class="hint">If a new window/tab doesn't open, the page will navigate here and then redirect.</div>
-    <div class="small">If your browser blocks popups: allow popups for this site or the redirect will open in the same tab.</div>
   </div>
 
 <script>
   (function(){
     var form = document.getElementById('feedbackForm');
     var submitBtn = document.getElementById('submitBtn');
+    
+    // Your Google Apps Script Web App URL
+    var scriptURL = "https://script.google.com/macros/s/AKfycbzqOxa8ZvNV7XK2ACABVt129BF70dHaG75mvMMSVEIlPnVedYD51OoA38Pi3OL5gbCioQ/exec";
 
     form.addEventListener('submit', function(e){
-      // Open the thankwin immediately on user gesture so the new window is "script-opened"
-      // That makes it possible for the thankyou page to call window.close()
-      try {
-        window.open('about:blank', 'thankwin');
-      } catch(err){
-        // ignore - popup blockers may prevent it
-      }
+      e.preventDefault(); // Stop the form from causing a page reload/redirect
 
-      // Optionally, disable the button to prevent double submits
+      // 1. UI Loading State
       submitBtn.disabled = true;
-      submitBtn.innerText = 'Sending…';
-      // Let the browser submit the form normally (no AJAX) — Apps Script will handle redirecting that window
-      // Note: if popup blocked, browser will navigate this tab to the Apps Script response (which will redirect to thankyou)
-      setTimeout(function(){
-        // Re-enable after a short delay in case something goes wrong
-        submitBtn.disabled = false;
-        submitBtn.innerText = 'Submit Feedback';
-      }, 5000);
-    }, false);
+      submitBtn.innerText = 'Sending...';
+
+      // 2. Send Data Silently
+      var formData = new FormData(form);
+      
+      fetch(scriptURL, { method: 'POST', body: formData, mode: 'no-cors'})
+        .then(function(response) {
+          // 3. Success! Redirect to Thank You page
+          window.location.href = "https://ltcawaydaydec2025.netlify.app/thankyou.html";
+        })
+        .catch(function(error) {
+          console.error('Error!', error.message);
+          // Optional: You could show an alert here, or just redirect anyway.
+          // For now, we redirect anyway to keep the user experience smooth.
+          window.location.href = "https://ltcawaydaydec2025.netlify.app/thankyou.html";
+        });
+    });
   })();
 </script>
 </body>
