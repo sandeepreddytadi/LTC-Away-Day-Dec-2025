@@ -1,10 +1,6 @@
 <!doctype html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Feedback</title>
-</head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body>
   <h2>Event Feedback</h2>
 
@@ -15,10 +11,15 @@
 
   <script>
     document.getElementById('feedbackForm').addEventListener('submit', function(e){
-      // Open (or focus) the thank-you window immediately — this makes it a user gesture so it can be closed later.
-      var win = window.open('about:blank', 'thankwin');
-      // Do nothing else — form will submit to the Apps Script and the response (Apps Script) will redirect that window to your Netlify thankyou page.
-      // If popup blocked, the browser will open the response in same tab — that's acceptable fallback.
+      // MUST open window in submit handler (user gesture) to avoid popup blockers
+      var win = window.open('about:blank', 'thankwin'); // same name used by form target
+      if (!win) {
+        // popup blocked — as fallback allow navigation in same tab (will still redirect)
+        console.warn('Popup blocked - fallback to same-tab navigation.');
+      } else {
+        try { win.document.title = "Processing…"; } catch(err){}
+      }
+      // the form will now submit into the thankwin and the Apps Script response will replace it to Netlify thankyou
     });
   </script>
 </body>
