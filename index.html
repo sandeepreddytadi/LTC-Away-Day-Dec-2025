@@ -1,97 +1,43 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>LTC Away Day — Quick Feedback</title>
-  <style>
-    body {
-      font-family: "Segoe UI", Roboto, Arial, sans-serif;
-      background: linear-gradient(180deg,#f7fbff,#e6f0ff);
-      margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
-    }
-    .card {
-      width: 100%;
-      max-width: 520px;
-      background: #fff;
-      border-radius: 14px;
-      padding: 24px;
-      box-shadow: 0 10px 30px rgba(20,40,80,0.08);
-      text-align:center;
-    }
-    h1 { margin:0 0 12px; font-size:20px; color:#0b2f66; }
-    p { margin:0 0 18px; color:#334b6b; }
-    input[type="text"]{
-      width: 100%;
-      padding: 12px 14px;
-      font-size:16px;
-      border-radius:10px;
-      border:1px solid #d6e3ff;
-      box-sizing:border-box;
-      margin-bottom:12px;
-    }
-    button.submit {
-      width:100%;
-      padding:12px 14px;
-      font-weight:600;
-      font-size:16px;
-      border-radius:10px;
-      border:none;
-      background: linear-gradient(90deg,#0072ff,#00c6ff);
-      color:white;
-      cursor:pointer;
-      box-shadow:0 8px 18px rgba(0,100,255,0.12);
-    }
-    button.submit:disabled {
-      background: #ccc;
-      cursor: default;
-    }
-  </style>
-</head>
-<body>
-  <div class="card" role="main">
-    <h1>LTC Away Day — Quick Feedback</h1>
-    <p>Enter one word that describes the session. Tap Submit — thank you!</p>
-
-    <form id="feedbackForm">
-      <input id="feedbackInput" name="feedback" type="text" placeholder="One word (e.g. Inspiring)" maxlength="60" required autocomplete="off" />
-      <button class="submit" type="submit" id="submitBtn">Submit Feedback</button>
-    </form>
-
-  </div>
-
 <script>
   (function(){
     var form = document.getElementById('feedbackForm');
     var submitBtn = document.getElementById('submitBtn');
     
-    // Your Google Apps Script Web App URL
+    // Double-check this is your CURRENT Web App URL
     var scriptURL = "https://script.google.com/macros/s/AKfycbzqOxa8ZvNV7XK2ACABVt129BF70dHaG75mvMMSVEIlPnVedYD51OoA38Pi3OL5gbCioQ/exec";
 
     form.addEventListener('submit', function(e){
-      // This line STOPS the browser from going to the Google page
-      e.preventDefault(); 
+      e.preventDefault();
 
-      // 1. Show 'Sending...'
       submitBtn.disabled = true;
       submitBtn.innerText = 'Sending...';
 
-      // 2. Prepare data
-      var formData = new FormData(form);
-      
-      // 3. Send to Google silently
-      fetch(scriptURL, { method: 'POST', body: formData, mode: 'no-cors'})
-        .then(function(response) {
-          // Success! Redirect to Thank You page
-          window.location.href = "https://ltcawaydaydec2025.netlify.app/thankyou.html";
-        })
-        .catch(function(error) {
-          // Even on error, we redirect to keep the flow smooth
-          console.error('Error!', error.message);
-          window.location.href = "https://ltcawaydaydec2025.netlify.app/thankyou.html";
-        });
+      // 1. Get the feedback text directly
+      var feedbackVal = document.getElementById('feedbackInput').value;
+
+      // 2. Create URL-encoded data (Key=Value format)
+      // This is much easier for Google Apps Script to read than FormData
+      var params = new URLSearchParams();
+      params.append('feedback', feedbackVal);
+
+      // 3. Send using fetch
+      fetch(scriptURL, { 
+          method: 'POST', 
+          body: params,
+          mode: 'no-cors', // Important for cross-domain requests
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+      })
+      .then(function(response) {
+         // Success!
+         window.location.href = "https://ltcawaydaydec2025.netlify.app/thankyou.html";
+      })
+      .catch(function(error) {
+         console.error('Error!', error.message);
+         // Redirect anyway so the user doesn't get stuck
+         window.location.href = "https://ltcawaydaydec2025.netlify.app/thankyou.html";
+      });
     });
   })();
 </script>
-</body>
-</html>
