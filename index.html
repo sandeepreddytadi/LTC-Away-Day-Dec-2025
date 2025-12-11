@@ -1,26 +1,101 @@
 <!doctype html>
-<html>
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>LTC Away Day — Quick Feedback</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      background: linear-gradient(180deg,#f7fbff,#e6f0ff);
+      margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+    }
+    .card {
+      width: 100%;
+      max-width: 520px;
+      background: #fff;
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(20,40,80,0.08);
+      text-align:center;
+    }
+    h1 { margin:0 0 12px; font-size:20px; color:#0b2f66; }
+    p { margin:0 0 18px; color:#334b6b; }
+    input[type="text"]{
+      width: 100%;
+      padding: 12px 14px;
+      font-size:16px;
+      border-radius:10px;
+      border:1px solid #d6e3ff;
+      box-sizing:border-box;
+      margin-bottom:12px;
+    }
+    button.submit {
+      width:100%;
+      padding:12px 14px;
+      font-weight:600;
+      font-size:16px;
+      border-radius:10px;
+      border:none;
+      background: linear-gradient(90deg,#0072ff,#00c6ff);
+      color:white;
+      cursor:pointer;
+      box-shadow:0 8px 18px rgba(0,100,255,0.12);
+    }
+    .hint { margin-top:12px; color:#607b9a; font-size:13px; }
+    .small { font-size:12px; color:#9aa9c3; margin-top:8px; }
+  </style>
+</head>
 <body>
-  <h2>Event Feedback</h2>
+  <div class="card" role="main">
+    <h1>LTC Away Day — Quick Feedback</h1>
+    <p>Enter one word that describes the session. Tap Submit — thank you!</p>
 
-  <form id="feedbackForm" action="https://script.google.com/macros/s/AKfycbzqOxa8ZvNV7XK2ACABVt129BF70dHaG75mvMMSVEIlPnVedYD51OoA38Pi3OL5gbCioQ/exec" method="POST" target="thankwin">
-    <input name="feedback" id="feedback" type="text" placeholder="Enter a word..." required />
-    <button type="submit" id="submitBtn">Submit</button>
-  </form>
+    <!--
+      IMPORTANT:
+      - target="thankwin" ensures the form submits into a new window/tab named thankwin.
+      - action uses your Apps Script web app /exec URL.
+      - The Apps Script doPost should redirect that window to your Netlify thankyou.html using location.replace()
+    -->
+    <form id="feedbackForm"
+          action="https://script.google.com/macros/s/AKfycbzqOxa8ZvNV7XK2ACABVt129BF70dHaG75mvMMSVEIlPnVedYD51OoA38Pi3OL5gbCioQ/exec"
+          method="POST"
+          target="thankwin"
+          accept-charset="UTF-8">
+      <input id="feedbackInput" name="feedback" type="text" placeholder="One word (e.g. Inspiring)" maxlength="60" required autocomplete="off" />
+      <button class="submit" type="submit" id="submitBtn">Submit Feedback</button>
+    </form>
 
-  <script>
-    document.getElementById('feedbackForm').addEventListener('submit', function(e){
-      // MUST open window in submit handler (user gesture) to avoid popup blockers
-      var win = window.open('about:blank', 'thankwin'); // same name used by form target
-      if (!win) {
-        // popup blocked — as fallback allow navigation in same tab (will still redirect)
-        console.warn('Popup blocked - fallback to same-tab navigation.');
-      } else {
-        try { win.document.title = "Processing…"; } catch(err){}
+    <div class="hint">If a new window/tab doesn't open, the page will navigate here and then redirect.</div>
+    <div class="small">If your browser blocks popups: allow popups for this site or the redirect will open in the same tab.</div>
+  </div>
+
+<script>
+  (function(){
+    var form = document.getElementById('feedbackForm');
+    var submitBtn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', function(e){
+      // Open the thankwin immediately on user gesture so the new window is "script-opened"
+      // That makes it possible for the thankyou page to call window.close()
+      try {
+        window.open('about:blank', 'thankwin');
+      } catch(err){
+        // ignore - popup blockers may prevent it
       }
-      // the form will now submit into the thankwin and the Apps Script response will replace it to Netlify thankyou
-    });
-  </script>
+
+      // Optionally, disable the button to prevent double submits
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Sending…';
+      // Let the browser submit the form normally (no AJAX) — Apps Script will handle redirecting that window
+      // Note: if popup blocked, browser will navigate this tab to the Apps Script response (which will redirect to thankyou)
+      setTimeout(function(){
+        // Re-enable after a short delay in case something goes wrong
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Submit Feedback';
+      }, 5000);
+    }, false);
+  })();
+</script>
 </body>
 </html>
