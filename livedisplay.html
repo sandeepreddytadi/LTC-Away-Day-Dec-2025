@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Live Display</title>
+    <style>
+        body {
+            background-color: #000000; /* Black background for screens */
+            color: #ffffff;            /* White text */
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;             /* Flexbox for centering */
+            justify-content: center;   /* Horizontal center */
+            align-items: center;       /* Vertical center */
+            overflow: hidden;          /* Hide scrollbars */
+            text-align: center;
+        }
+
+        #content-display {
+            font-size: 8vw;           /* Responsive font size (8% of screen width) */
+            font-weight: bold;
+            line-height: 1.2;
+            padding: 20px;
+            max-width: 90%;
+            text-transform: uppercase; /* Optional: makes text look more impactful */
+            transition: opacity 0.5s ease-in-out; /* Smooth fade effect */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="content-display">Waiting for AI...</div>
+
+    <script>
+        // PASTE YOUR GOOGLE APPS SCRIPT URL HERE
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbzqOxa8ZvNV7XK2ACABVt129BF70dHaG75mvMMSVEIlPnVedYD51OoA38Pi3OL5gbCioQ/exec';
+
+        async function fetchData() {
+            try {
+                const response = await fetch(scriptUrl);
+                const text = await response.text();
+                
+                const displayElement = document.getElementById('content-display');
+                
+                // Only update if the text has changed to prevent flickering
+                if (displayElement.innerText !== text && text !== "") {
+                    // Optional: Simple fade out/in effect
+                    displayElement.style.opacity = 0;
+                    setTimeout(() => {
+                        displayElement.innerText = text;
+                        displayElement.style.opacity = 1;
+                    }, 500);
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        // Fetch immediately on load
+        fetchData();
+
+        // Refresh every 5000 milliseconds (5 seconds)
+        setInterval(fetchData, 5000);
+    </script>
+
+</body>
+</html>
