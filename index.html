@@ -1,26 +1,206 @@
-
 <!doctype html>
-<html>
+<html lang="en">
+
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Feedback</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Feedback</title>
+    <style>
+        :root {
+            --blue1: #00c6ff;
+            --blue2: #0072ff;
+        }
+
+        body {
+            font-family: "Segoe UI", Roboto, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #f0f2f5;
+        }
+
+        /* Form Container */
+        #form-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            transition: opacity 0.3s ease;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button {
+            background: var(--blue2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #005bb5;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Thank You Overlay (Hidden by default) */
+        #thank-you-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--blue1), var(--blue2));
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 1000;
+        }
+
+        .card {
+            width: 90%;
+            max-width: 420px;
+            border-radius: 16px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.06));
+            padding: 28px;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+            backdrop-filter: blur(6px);
+        }
+
+        .card h1 {
+            margin: 0 0 6px;
+            font-size: 26px;
+        }
+
+        .card p {
+            margin: 0 0 18px;
+            color: rgba(255, 255, 255, 0.92);
+            font-size: 16px;
+        }
+
+        .action-btn {
+            display: inline-block;
+            padding: 12px 18px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            background: white;
+            color: var(--blue2);
+            box-shadow: 0 8px 20px rgba(0, 40, 120, 0.18);
+        }
+    </style>
 </head>
+
 <body>
-  <h2>Event Feedback</h2>
 
-  <form id="feedbackForm" action="https://script.google.com/macros/s/AKfycbzqOxa8ZvNV7XK2ACABVt129BF70dHaG75mvMMSVEIlPnVedYD51OoA38Pi3OL5gbCioQ/exec" method="POST" target="thankwin">
-    <input name="feedback" id="feedback" type="text" placeholder="Enter a word..." required />
-    <button type="submit" id="submitBtn">Submit</button>
-  </form>
+    <!-- Main Form -->
+    <div id="form-container">
+        <h2>Event Feedback</h2>
+        <form id="feedbackForm">
+            <input name="feedback" id="feedback" type="text" placeholder="Enter a word..." required />
+            <button type="submit" id="submitBtn">Submit</button>
+        </form>
+    </div>
 
-  <script>
-    document.getElementById('feedbackForm').addEventListener('submit', function(e){
-      // Open (or focus) the thank-you window immediately — this makes it a user gesture so it can be closed later.
-      var win = window.open('about:blank', 'thankwin');
-      // Do nothing else — form will submit to the Apps Script and the response (Apps Script) will redirect that window to your Netlify thankyou page.
-      // If popup blocked, the browser will open the response in same tab — that's acceptable fallback.
-    });
-  </script>
+    <!-- Thank You Overlay -->
+    <div id="thank-you-overlay">
+        <div class="card">
+            <h1>Thanks — feedback recorded!</h1>
+            <p>Your input helps make the next event even better. 🎉</p>
+            <button class="action-btn" id="resetBtn">Submit Another Response</button>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('feedbackForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const overlay = document.getElementById('thank-you-overlay');
+        const resetBtn = document.getElementById('resetBtn');
+        const formContainer = document.getElementById('form-container');
+
+        // Replace with your actual Web App URL
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzqOxa8ZvNV7XK2ACABVt129BF70dHaG75mvMMSVEIlPnVedYD51OoA38Pi3OL5gbCioQ/exec";
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Submitting...";
+
+            const feedback = document.getElementById('feedback').value;
+
+            // Use fetch to send data
+            // Note: 'no-cors' mode is often needed for Google Apps Script if not properly handling CORS headers,
+            // but we added JSON return support. If CORS is still an issue, 'no-cors' will work but response is opaque.
+            // We'll try standard POST first.
+
+            // Construct URL-encoded data for maximum compatibility
+            const formData = new URLSearchParams();
+            formData.append('feedback', feedback);
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    // Even if opaque (no-cors), we assume success if no network error
+                    showThankYou();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("There was a problem submitting your feedback. Please try again.");
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Submit";
+                });
+        });
+
+        function showThankYou() {
+            formContainer.style.opacity = '0';
+            setTimeout(() => {
+                overlay.style.display = 'flex';
+                // Reset form
+                form.reset();
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Submit";
+            }, 300);
+        }
+
+        resetBtn.addEventListener('click', function () {
+            overlay.style.display = 'none';
+            formContainer.style.opacity = '1';
+        });
+    </script>
+
 </body>
+
 </html>
