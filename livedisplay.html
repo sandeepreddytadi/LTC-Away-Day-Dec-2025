@@ -12,28 +12,30 @@
             margin: 0;
             padding: 0;
             height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            
+            /* --- LAYOUT SETTINGS --- */
+            display: flex;             
+            justify-content: center;   /* Center Horizontally */
+            align-items: flex-start;   /* Align to TOP (Not Vertical Center) */
+            /* ----------------------- */
+            
             overflow: hidden;
             text-align: center;
             position: relative; 
         }
 
         #content-display {
-            /* --- CHANGED SETTINGS --- */
-            width: 50%;             /* Forces the width to be exactly 50% */
-            max-width: 50%;         /* Ensures it never exceeds 50% */
-            font-size: 5vw;         /* Adjusted font size to fit the narrower width */
-            /* ------------------------ */
-            
+            /* --- WIDTH SETTINGS --- */
+            width: 50%;                /* Occupy exactly 50% of screen width */
+            margin-top: 15vh;          /* Push down 15% from the top */
+            font-size: 5vw;            
+            /* ---------------------- */
+
             font-weight: bold;
             line-height: 1.2;
             padding: 20px;
             text-transform: uppercase;
             transition: opacity 0.5s ease-in-out;
-            
-            /* Ensure text wraps nicely */
             word-wrap: break-word; 
         }
 
